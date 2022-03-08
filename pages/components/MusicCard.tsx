@@ -5,7 +5,7 @@ import { RiCloseFill } from "react-icons/ri";
 function MusicFile(props: any) {
   return (
     <div
-      className={`flex items-center justify-center rounded-lg bg-[#4c5288] border-[3px] ${
+      className={`flex items-center justify-center rounded-lg bg-[#40649b] border-[3px] ${
         props.selected
           ? "border-[#2A79EF] drop-shadow-[0_2px_5px_#0f5afd66]"
           : "border-[#7BB0FF] drop-shadow-md"
