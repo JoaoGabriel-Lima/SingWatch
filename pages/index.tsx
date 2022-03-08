@@ -48,14 +48,9 @@ const Home: NextPage = () => {
     const getData = async () => {
       if (inputValue.trim() !== "") {
         axios
-          .get(
-            `https://cors.jg-limamarinho202.workers.dev/?https://api.deezer.com/search?q=${encodeURI(
-              inputValue
-            )}`,
-            {
-              headers: { "Access-Control-Allow-Origin": "*" },
-            }
-          )
+          .get(`https://api.deezer.com/search?q=${encodeURI(inputValue)}`, {
+            headers: { "Access-Control-Allow-Origin": "*" },
+          })
           .then((res) => {
             setMusicList(res.data.data.slice(0, 3));
             setIsLoading(false);
