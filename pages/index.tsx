@@ -163,7 +163,7 @@ const Home: NextPage = () => {
         </div>
         <div
           id="lycris"
-          className="w-[100%] max-w-[1000px] bg-[#1f4174] min-h-[600px]  mt-10 rounded-t-[30px]"
+          className="w-[100%] max-w-[1000px] bg-[#2765C1] min-h-[600px]  mt-10 rounded-t-[30px]"
         >
           {selectedMusic.author != undefined ? (
             <div className="w-full h-full flex flex-col px-[33px] py-[30px]">
@@ -210,7 +210,7 @@ const Home: NextPage = () => {
                 Add some songs to your history and we'll show you the lyrics
               </h4>
               <h2 className="mt-10 text-center text-white/90 font-medium text-[17px] max-w-[600px]">
-                Sing<span className="text-[#2a79ef]">Watch</span> is an open
+                Sing<span className="text-[#0b1a31]">Watch</span> is an open
                 source project that aims to find song lyrics without
                 difficulties, after all who doesn't like to know how to sing
                 their favorite song?
