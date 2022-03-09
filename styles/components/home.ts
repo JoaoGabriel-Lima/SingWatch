@@ -15,4 +15,14 @@ export const HomeCointainer = styled.div`
   #musichistory {
     box-shadow: 0px 4px 0px #314056;
   }
+
+  #lyrics {
+    background-color: ${(props) =>
+      props.theme.error ? "#2a2b35" : props.theme.colors};
+  }
+
+  #lyricstext {
+    color: ${(props) =>
+      props.theme.textColor ? "rgba(0, 0, 0, 0.6)" : "#fff"};
+  }
 `;
