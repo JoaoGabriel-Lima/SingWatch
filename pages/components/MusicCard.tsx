@@ -7,13 +7,13 @@ function MusicFile(props: any) {
     <div
       className={`bg-[#40649b] flex items-center justify-center rounded-lg border-[3px] ${
         props.selected
-          ? "border-[#2A79EF] drop-shadow-[0_2px_5px_#0f5afd66]"
+          ? "border-[#ffffff] drop-shadow-[0_1px_4px_#ffffff68]"
           : "border-[#7BB0FF] drop-shadow-md"
       }   h-20 w-20 min-w-[5rem]`}
     >
       <img
         src={props.cover}
-        className="w-full h-full rounded-lg cursor-pointer"
+        className="w-full h-full rounded-md cursor-pointer"
         onClick={() => props.selectmusic(props.index)}
       />
       <div
