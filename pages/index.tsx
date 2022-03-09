@@ -251,7 +251,7 @@ const Home: NextPage = () => {
                   onChange={(e) => setInputValue(e.target.value)}
                   type="text"
                   placeholder="Try 'Currents' by Tame Impala"
-                  className="w-full bg-transparent outline-none placeholder:text-[13px] placeholder:text-white/70 border-0 text-white font-normal ml-3 text-[14px] pt-1"
+                  className="w-full bg-transparent outline-none placeholder:text-[13px] placeholder:text-white/70 border-0 text-white font-normal ml-3 text-[14px]"
                 />
               </div>
               {inputValue.trim() !== "" && (
@@ -313,7 +313,7 @@ const Home: NextPage = () => {
                       className="w-[4.5rem] h-[4.5rem] min-w-[4.5rem] bg-white rounded-lg drop-shadow-xl"
                       src={selectedMusic.cover}
                     ></img>
-                    <div className="flex flex-col ml-4 justify-center">
+                    <div className="flex flex-col ml-4 justify-center font-medium">
                       <h1 className="text-white ">{selectedMusic.title}</h1>
                       <h4 className="text-sm text-white/60">
                         {selectedMusic.album} - {selectedMusic.author}
@@ -345,7 +345,7 @@ const Home: NextPage = () => {
                     <>
                       <p
                         id="lyricstext"
-                        className="text-white whitespace-pre-line leading-[3rem] font-semibold text-3xl"
+                        className="text-white whitespace-pre-line leading-[2.6rem] font-semibold text-[1.4rem]"
                       >{`${musicLyric}`}</p>
                       <p className="mt-12 text-white/80 text-sm">
                         Lyrics provided by {provider}

@@ -23,6 +23,6 @@ export const HomeCointainer = styled.div`
 
   #lyricstext {
     color: ${(props) =>
-      props.theme.textColor ? "rgba(0, 0, 0, 0.6)" : "#fff"};
+      props.theme.textColor ? "rgba(0, 0, 0, 0.6)" : "rgba(255,255,255,0.8)"};
   }
 `;

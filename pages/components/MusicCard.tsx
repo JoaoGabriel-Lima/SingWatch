@@ -7,7 +7,7 @@ function MusicFile(props: any) {
     <div
       className={`bg-[#40649b] flex items-center justify-center rounded-lg border-[3px] ${
         props.selected
-          ? "border-[#ffffff] drop-shadow-[0_1px_4px_#ffffff68]"
+          ? "border-[#aed2e2] drop-shadow-[0_1px_4px_#ffffff68]"
           : "border-[#7BB0FF] drop-shadow-md"
       }   h-20 w-20 min-w-[5rem]`}
     >
