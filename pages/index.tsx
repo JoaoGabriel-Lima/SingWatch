@@ -310,7 +310,7 @@ const Home: NextPage = () => {
                 <div className="flex justify-between items-center">
                   <div className="flex justify-start items-center">
                     <img
-                      className="w-[4.5rem] h-[4.5rem] min-w-[4.rem] bg-white rounded-lg drop-shadow-xl"
+                      className="w-[4.5rem] h-[4.5rem] min-w-[4.5rem] bg-white rounded-lg drop-shadow-xl"
                       src={selectedMusic.cover}
                     ></img>
                     <div className="flex flex-col ml-4 justify-center">
