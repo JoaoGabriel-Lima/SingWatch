@@ -15,6 +15,9 @@ export const HomeCointainer = styled.div`
   #musichistory {
     box-shadow: 0px 4px 0px #314056;
   }
+  #discordcard {
+    box-shadow: 0px 4px 0px #314056;
+  }
 
   #lyrics {
     background-color: ${(props) =>

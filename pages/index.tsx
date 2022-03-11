@@ -10,6 +10,7 @@ import { RiLoader4Fill } from "react-icons/ri";
 import Link from "next/link";
 import MusicHistoryCard from "./components/MusicHistoryCard";
 import { ThemeProvider } from "styled-components";
+import DiscordSyncCard from "./components/discordSyncCard";
 
 const Home: NextPage = () => {
   const [inputValue, setInputValue] = React.useState("");
@@ -206,6 +207,11 @@ const Home: NextPage = () => {
     error: lyricsError,
     textColor: selecttextcolor,
   };
+
+  // useEffect(() => {
+  //   return () => clearInterval(interval);
+  // }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <HomeCointainer>
@@ -298,6 +304,8 @@ const Home: NextPage = () => {
                 deletemusic={handleMusicHistoryDelete}
               />
             )}
+
+            <DiscordSyncCard />
           </div>
           {selectedMusic.author != undefined && musicHistory.length > 0 ? (
             <div
@@ -345,7 +353,7 @@ const Home: NextPage = () => {
                     <>
                       <p
                         id="lyricstext"
-                        className="text-white whitespace-pre-line leading-[2.6rem] font-semibold text-[1.4rem]"
+                        className="text-white whitespace-pre-line text-[1.35rem] leading-[2.2rem] sm:leading-[2.6rem] font-semibold sm:text-[1.4rem]"
                       >{`${musicLyric}`}</p>
                       <p className="mt-12 text-white/80 text-sm">
                         Lyrics provided by {provider}
