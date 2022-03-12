@@ -13,21 +13,53 @@ function DiscordSyncCard(props: any) {
   const [inputID, setInputID]: any = React.useState("");
   const [datatofetch, setData]: any = React.useState(null);
 
+  const getUser = (data: any, id: string) => {
+    return data.find((data: any) => data.channels[0].users.includes(id));
+  };
+
+  function timeSince(date: any) {
+    const actualdate: any = new Date();
+    const seconds = Math.floor((actualdate - Date.parse(date)) / 1000);
+    let interval = Math.floor(seconds / 31536000);
+    interval = Math.floor(seconds / 60);
+    if (interval > 1) {
+      return interval;
+    } else {
+      return interval;
+    }
+  }
+
+  function setSync() {
+    if (isSyncEnabled) {
+      setSyncEnabled(!isSyncEnabled);
+      const syncdata = [inputID, !isSyncEnabled];
+      localStorage.setItem("discordID", JSON.stringify(syncdata));
+    } else {
+      if (inputID.trim() != "") {
+        setSyncEnabled(!isSyncEnabled);
+        const syncdata = [inputID, !isSyncEnabled];
+        localStorage.setItem("discordID", JSON.stringify(syncdata));
+        const content = getUser(datatofetch, inputID);
+        setDiscordSync(content);
+      } else {
+        const syncdata = [inputID, isSyncEnabled];
+        localStorage.setItem("discordID", JSON.stringify(syncdata));
+      }
+    }
+  }
+
   useEffect(() => {
     if (typeof window === "object") {
       if (localStorage.getItem("discordID") !== null) {
         const data = JSON.parse(localStorage.getItem("discordID") || "[]");
         setInputID(data[0]);
         setSyncEnabled(data[1]);
-        // console.log(data[1]);
       }
     }
-
     const socket = io("https://singwatch-backend.herokuapp.com/", {
       transports: ["websocket", "polling", "flashsocket"],
     });
     socket.on("previusData", (data: any) => {
-      // console.log(data);
       const inputvalue = JSON.parse(
         localStorage.getItem("discordID") || "[]"
       )[0];
@@ -36,7 +68,6 @@ function DiscordSyncCard(props: any) {
       setData(data);
     });
     socket.on("setNewData", (data: any) => {
-      // console.log(data);
       const inputvalue = JSON.parse(
         localStorage.getItem("discordID") || "[]"
       )[0];
@@ -97,7 +128,6 @@ function DiscordSyncCard(props: any) {
             if (
               selectedMusic.tile != discordSync.musicPlaying.musicData.music
             ) {
-              // setSelectedMusic({});
               setNowPlaying({});
             }
           }
@@ -140,8 +170,6 @@ function DiscordSyncCard(props: any) {
                   } else {
                     setSelectedMusic({});
                   }
-                  // } else {
-                  // }
                 }
                 setMusicData(res.data);
               }
@@ -162,42 +190,6 @@ function DiscordSyncCard(props: any) {
       }
     }
   }, [discordSync, isSyncEnabled]);
-
-  // create a function that will get a array of objects and will return the one where has the id "123" inside object.channels[0].users array
-  const getUser = (data: any, id: string) => {
-    return data.find((data: any) => data.channels[0].users.includes(id));
-  };
-
-  function timeSince(date: any) {
-    const actualdate: any = new Date();
-    const seconds = Math.floor((actualdate - Date.parse(date)) / 1000);
-    let interval = Math.floor(seconds / 31536000);
-    interval = Math.floor(seconds / 60);
-    if (interval > 1) {
-      return interval;
-    } else {
-      return interval;
-    }
-  }
-
-  function setSync() {
-    if (isSyncEnabled) {
-      setSyncEnabled(!isSyncEnabled);
-      const syncdata = [inputID, !isSyncEnabled];
-      localStorage.setItem("discordID", JSON.stringify(syncdata));
-    } else {
-      if (inputID.trim() != "") {
-        setSyncEnabled(!isSyncEnabled);
-        const syncdata = [inputID, !isSyncEnabled];
-        localStorage.setItem("discordID", JSON.stringify(syncdata));
-        const content = getUser(datatofetch, inputID);
-        setDiscordSync(content);
-      } else {
-        const syncdata = [inputID, isSyncEnabled];
-        localStorage.setItem("discordID", JSON.stringify(syncdata));
-      }
-    }
-  }
 
   return (
     <>

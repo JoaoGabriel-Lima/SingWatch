@@ -1,6 +1,4 @@
 /* eslint-disable require-jsdoc */
-// const songlyrics = require("songlyrics").default;
-// import lyricsSearcher from "lyrics-searcher";
 import { getLyrics } from "genius-lyrics-api";
 
 export default async function handler(req, res) {

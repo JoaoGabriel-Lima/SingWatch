@@ -12,7 +12,6 @@ import MusicHistoryCard from "./components/MusicHistoryCard";
 import { ThemeProvider } from "styled-components";
 import DiscordSyncCard from "./components/discordSyncCard";
 import { MusicContext } from "../context/music";
-// import DiscordSyncCard from "./components/discordSyncCar
 
 const Home: NextPage = () => {
   const [inputValue, setInputValue] = React.useState("");
@@ -78,12 +77,10 @@ const Home: NextPage = () => {
     const musicColorDecied = Math.floor(Math.random() * colors.length);
     setSelectedColor(colors[musicColorDecied]);
     setSelecttextcolor(texts[musicColorDecied]);
-    // find index of selected color in colors array and set text color
 
     setLyricsError(false);
     setIsLoadingLyrics(true);
     setProvider("SingWatch Lyrics");
-    // console.log(selectedMusic);
     const musictoFind = selectedMusic;
     if (musictoFind.author != undefined || musictoFind.title != undefined) {
       axios
@@ -183,7 +180,6 @@ const Home: NextPage = () => {
   };
 
   const handleMusicHistorySelect = (i: any) => {
-    // move to the top of the list
     const newMusicHistory: any = [
       musicHistory[i],
       ...musicHistory.slice(0, i),
