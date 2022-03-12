@@ -23,7 +23,7 @@ function DiscordSyncCard(props: any) {
       }
     }
 
-    const socket = io("http://localhost:8080", {
+    const socket = io("https://singwatch-backend.herokuapp.com/", {
       transports: ["websocket", "polling", "flashsocket"],
     });
     socket.on("previusData", (data: any) => {
