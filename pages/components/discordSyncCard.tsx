@@ -19,6 +19,7 @@ function DiscordSyncCard(props: any) {
         const data = JSON.parse(localStorage.getItem("discordID") || "[]");
         setInputID(data[0]);
         setSyncEnabled(data[1]);
+        // console.log(data[1]);
       }
     }
 
@@ -26,21 +27,77 @@ function DiscordSyncCard(props: any) {
       transports: ["websocket", "polling", "flashsocket"],
     });
     socket.on("previusData", (data: any) => {
-      const content = getUser(data, inputID);
+      // console.log(data);
+      const inputvalue = JSON.parse(
+        localStorage.getItem("discordID") || "[]"
+      )[0];
+      const content = getUser(data, inputID || inputvalue);
       setDiscordSync(content);
       setData(data);
     });
     socket.on("setNewData", (data: any) => {
-      const content = getUser(data, inputID);
+      // console.log(data);
+      const inputvalue = JSON.parse(
+        localStorage.getItem("discordID") || "[]"
+      )[0];
+      const content = getUser(data, inputID || inputvalue);
       setDiscordSync(content);
       setData(data);
     });
   }, []);
 
   useEffect(() => {
-    if (discordSync != null || discordSync != undefined) {
-      if (nowPlaying != null) {
-        if (nowPlaying.music != discordSync.musicPlaying.musicData.music) {
+    if (isSyncEnabled) {
+      if (discordSync != null || discordSync != undefined) {
+        if (nowPlaying != null) {
+          if (nowPlaying.music != discordSync.musicPlaying.musicData.music) {
+            const music = discordSync.musicPlaying.musicData;
+            setNowPlaying(music);
+            axios
+              .post("/api/getMusicInfo", {
+                music: `${music.music} ${music.author}`,
+              })
+              .then((res): any => {
+                if (Object.keys(res.data).length == 0) {
+                  setMusicData(null);
+                } else {
+                  const data = {
+                    album: res.data.data.album.title,
+                    author: res.data.data.artist.name,
+                    cover: res.data.data.album.cover,
+                    title: res.data.data.title,
+                  };
+                  if (timeSince(discordSync.musicPlaying.updateAt) < 6) {
+                    setSelectedMusic(data);
+                    window.scrollTo({
+                      top: 0,
+                      behavior: "smooth", // for smoothly scrolling
+                    });
+                  } else if (timeSince(discordSync.musicPlaying.updateAt) > 6) {
+                    const musicData = JSON.parse(
+                      localStorage.getItem("musicHistory") || "[]"
+                    );
+                    if (musicData.length > 0) {
+                      setSelectedMusic(musicData[0]);
+                      window.scrollTo({
+                        top: 0,
+                        behavior: "smooth", // for smoothly scrolling
+                      });
+                    } else {
+                      setSelectedMusic({});
+                    }
+                  }
+                  setMusicData(res.data);
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }
+        } else if (
+          discordSync.musicPlaying.musicData != null ||
+          discordSync.musicPlaying.musicData != undefined
+        ) {
           const music = discordSync.musicPlaying.musicData;
           setNowPlaying(music);
           axios
@@ -76,6 +133,8 @@ function DiscordSyncCard(props: any) {
                   } else {
                     setSelectedMusic({});
                   }
+                  // } else {
+                  // }
                 }
                 setMusicData(res.data);
               }
@@ -84,66 +143,18 @@ function DiscordSyncCard(props: any) {
               console.log(err);
             });
         }
-      } else if (
-        discordSync.musicPlaying.musicData != null ||
-        discordSync.musicPlaying.musicData != undefined
-      ) {
-        const music = discordSync.musicPlaying.musicData;
-        setNowPlaying(music);
-        axios
-          .post("/api/getMusicInfo", {
-            music: `${music.music} ${music.author}`,
-          })
-          .then((res): any => {
-            if (Object.keys(res.data).length == 0) {
-              setMusicData(null);
-            } else {
-              const data = {
-                album: res.data.data.album.title,
-                author: res.data.data.artist.name,
-                cover: res.data.data.album.cover,
-                title: res.data.data.title,
-              };
-              if (timeSince(discordSync.musicPlaying.updateAt) < 6) {
-                setSelectedMusic(data);
-                window.scrollTo({
-                  top: 0,
-                  behavior: "smooth", // for smoothly scrolling
-                });
-              } else if (timeSince(discordSync.musicPlaying.updateAt) > 6) {
-                const musicData = JSON.parse(
-                  localStorage.getItem("musicHistory") || "[]"
-                );
-                if (musicData.length > 0) {
-                  setSelectedMusic(musicData[0]);
-                  window.scrollTo({
-                    top: 0,
-                    behavior: "smooth", // for smoothly scrolling
-                  });
-                } else {
-                  setSelectedMusic({});
-                }
-                // } else {
-                // }
-              }
-              setMusicData(res.data);
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      }
-    } else {
-      const musicData = JSON.parse(
-        localStorage.getItem("musicHistory") || "[]"
-      );
-      if (musicData.length > 0) {
-        setSelectedMusic(musicData[0]);
       } else {
-        setSelectedMusic({});
+        const musicData = JSON.parse(
+          localStorage.getItem("musicHistory") || "[]"
+        );
+        if (musicData.length > 0) {
+          setSelectedMusic(musicData[0]);
+        } else {
+          setSelectedMusic({});
+        }
       }
     }
-  }, [discordSync]);
+  }, [discordSync, isSyncEnabled]);
 
   // create a function that will get a array of objects and will return the one where has the id "123" inside object.channels[0].users array
   const getUser = (data: any, id: string) => {
