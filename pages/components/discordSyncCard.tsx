@@ -8,7 +8,7 @@ function DiscordSyncCard(props: any) {
   const [discordSync, setDiscordSync]: any = React.useState(null);
   const [nowPlaying, setNowPlaying]: any = React.useState(null);
   const [musicData, setMusicData]: any = React.useState(null);
-  const { setSelectedMusic, isSyncEnabled, setSyncEnabled } =
+  const { selectedMusic, setSelectedMusic, isSyncEnabled, setSyncEnabled } =
     useContext(MusicContext);
   const [inputID, setInputID]: any = React.useState("");
   const [datatofetch, setData]: any = React.useState(null);
@@ -23,7 +23,7 @@ function DiscordSyncCard(props: any) {
       }
     }
 
-    const socket = io("https://singwatch-backend.herokuapp.com/", {
+    const socket = io("http://localhost:8080", {
       transports: ["websocket", "polling", "flashsocket"],
     });
     socket.on("previusData", (data: any) => {
@@ -93,6 +93,13 @@ function DiscordSyncCard(props: any) {
               .catch((err) => {
                 console.log(err);
               });
+          } else if (Object.keys(selectedMusic).length != 0 && isSyncEnabled) {
+            if (
+              selectedMusic.tile != discordSync.musicPlaying.musicData.music
+            ) {
+              // setSelectedMusic({});
+              setNowPlaying({});
+            }
           }
         } else if (
           discordSync.musicPlaying.musicData != null ||
