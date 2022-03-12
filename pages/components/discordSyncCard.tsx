@@ -5,6 +5,7 @@ import io from "socket.io-client";
 import { MusicContext } from "../../context/music";
 
 function DiscordSyncCard(props: any) {
+  const SOCKET = process.env.NEXT_PUBLIC_SOCKET_URL;
   const [discordSync, setDiscordSync]: any = React.useState(null);
   const [nowPlaying, setNowPlaying]: any = React.useState(null);
   const [musicData, setMusicData]: any = React.useState(null);
@@ -56,7 +57,7 @@ function DiscordSyncCard(props: any) {
         setSyncEnabled(data[1]);
       }
     }
-    const socket = io("https://singwatch-backend.herokuapp.com/", {
+    const socket = io(`${SOCKET}`, {
       transports: ["websocket", "polling", "flashsocket"],
     });
     socket.on("previusData", (data: any) => {
