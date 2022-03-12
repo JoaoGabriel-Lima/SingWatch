@@ -6,8 +6,7 @@ export default async function handler(req, res) {
   const title = req.body.title;
   if (req.method === "POST") {
     const options = {
-      apiKey:
-        "RX-7IigLielBdgIkVhNHwCH_avGLYowTpbRJMqkbM_KCQiJZDTxmjrUz43yAwYbH",
+      apiKey: process.env.GENIUS_API,
       title: title,
       artist: author,
       optimizeQuery: true,

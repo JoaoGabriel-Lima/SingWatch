@@ -127,7 +127,7 @@ const Home: NextPage = () => {
       if (inputValue.trim() !== "") {
         axios
           .get(
-            `https://cors.jg-limamarinho202.workers.dev/?https://api.deezer.com/search?q=${encodeURI(
+            `${process.env.MUSIC_INFO_URI}=${encodeURI(
               inputValue
                 .trim()
                 .normalize("NFD")

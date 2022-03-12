@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 
     await axios
       .get(
-        `https://cors.jg-limamarinho202.workers.dev/?https://api.deezer.com/search?q=${encodeURI(
+        `${process.env.MUSIC_INFO_URI}=${encodeURI(
           music
             .trim()
             .normalize("NFD")
