@@ -1,22 +1,157 @@
 /* eslint-disable require-jsdoc */
 import axios from "axios";
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
+import io from "socket.io-client";
+import { MusicContext } from "../../context/music";
 
 function DiscordSyncCard(props: any) {
   const [discordSync, setDiscordSync]: any = React.useState(null);
   const [nowPlaying, setNowPlaying]: any = React.useState(null);
-  const [lastPlayed, setLastPlayed]: any = React.useState(null);
   const [musicData, setMusicData]: any = React.useState(null);
-  // const [lastUpdate, setLastUpdate]: any = React.useState(null);
-  //   useEffect(() => {
-  //     props.musics.reverse();
-  //   }, [props.musics]);
+  const { setSelectedMusic, isSyncEnabled, setSyncEnabled } =
+    useContext(MusicContext);
+  const [inputID, setInputID]: any = React.useState("");
+  const [datatofetch, setData]: any = React.useState(null);
 
-  // Create a function that will recive a date and will return a string with the time since the date in minutes
+  useEffect(() => {
+    if (typeof window === "object") {
+      if (localStorage.getItem("discordID") !== null) {
+        const data = JSON.parse(localStorage.getItem("discordID") || "[]");
+        setInputID(data[0]);
+        setSyncEnabled(data[1]);
+      }
+    }
+
+    const socket = io("https://singwatch-backend.herokuapp.com/", {
+      transports: ["websocket", "polling", "flashsocket"],
+    });
+    socket.on("previusData", (data: any) => {
+      const content = getUser(data, inputID);
+      setDiscordSync(content);
+      setData(data);
+    });
+    socket.on("setNewData", (data: any) => {
+      const content = getUser(data, inputID);
+      setDiscordSync(content);
+      setData(data);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (discordSync != null || discordSync != undefined) {
+      if (nowPlaying != null) {
+        if (nowPlaying.music != discordSync.musicPlaying.musicData.music) {
+          const music = discordSync.musicPlaying.musicData;
+          setNowPlaying(music);
+          axios
+            .post("/api/getMusicInfo", {
+              music: `${music.music} ${music.author}`,
+            })
+            .then((res): any => {
+              if (Object.keys(res.data).length == 0) {
+                setMusicData(null);
+              } else {
+                const data = {
+                  album: res.data.data.album.title,
+                  author: res.data.data.artist.name,
+                  cover: res.data.data.album.cover,
+                  title: res.data.data.title,
+                };
+                if (timeSince(discordSync.musicPlaying.updateAt) < 6) {
+                  setSelectedMusic(data);
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth", // for smoothly scrolling
+                  });
+                } else if (timeSince(discordSync.musicPlaying.updateAt) > 6) {
+                  const musicData = JSON.parse(
+                    localStorage.getItem("musicHistory") || "[]"
+                  );
+                  if (musicData.length > 0) {
+                    setSelectedMusic(musicData[0]);
+                    window.scrollTo({
+                      top: 0,
+                      behavior: "smooth", // for smoothly scrolling
+                    });
+                  } else {
+                    setSelectedMusic({});
+                  }
+                }
+                setMusicData(res.data);
+              }
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        }
+      } else if (
+        discordSync.musicPlaying.musicData != null ||
+        discordSync.musicPlaying.musicData != undefined
+      ) {
+        const music = discordSync.musicPlaying.musicData;
+        setNowPlaying(music);
+        axios
+          .post("/api/getMusicInfo", {
+            music: `${music.music} ${music.author}`,
+          })
+          .then((res): any => {
+            if (Object.keys(res.data).length == 0) {
+              setMusicData(null);
+            } else {
+              const data = {
+                album: res.data.data.album.title,
+                author: res.data.data.artist.name,
+                cover: res.data.data.album.cover,
+                title: res.data.data.title,
+              };
+              if (timeSince(discordSync.musicPlaying.updateAt) < 6) {
+                setSelectedMusic(data);
+                window.scrollTo({
+                  top: 0,
+                  behavior: "smooth", // for smoothly scrolling
+                });
+              } else if (timeSince(discordSync.musicPlaying.updateAt) > 6) {
+                const musicData = JSON.parse(
+                  localStorage.getItem("musicHistory") || "[]"
+                );
+                if (musicData.length > 0) {
+                  setSelectedMusic(musicData[0]);
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth", // for smoothly scrolling
+                  });
+                } else {
+                  setSelectedMusic({});
+                }
+                // } else {
+                // }
+              }
+              setMusicData(res.data);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+    } else {
+      const musicData = JSON.parse(
+        localStorage.getItem("musicHistory") || "[]"
+      );
+      if (musicData.length > 0) {
+        setSelectedMusic(musicData[0]);
+      } else {
+        setSelectedMusic({});
+      }
+    }
+  }, [discordSync]);
+
+  // create a function that will get a array of objects and will return the one where has the id "123" inside object.channels[0].users array
+  const getUser = (data: any, id: string) => {
+    return data.find((data: any) => data.channels[0].users.includes(id));
+  };
+
   function timeSince(date: any) {
     const actualdate: any = new Date();
-
-    // console.log(date);
     const seconds = Math.floor((actualdate - Date.parse(date)) / 1000);
     let interval = Math.floor(seconds / 31536000);
     interval = Math.floor(seconds / 60);
@@ -27,155 +162,60 @@ function DiscordSyncCard(props: any) {
     }
   }
 
-  // useEffect(() => {
-  //   if (discordSync != null) {
-  //     setLastUpdate(discordSync.musicPlaying.updateAt);
-  //   }
-  // }, [discordSync]);
-
-  useEffect(() => {
-    updateCheckStatus(discordSync);
-  }, []);
-
-  useEffect(() => {
-    if (lastPlayed == null && nowPlaying != null) {
-      console.log("First Init");
-      axios
-        .post("/api/getMusicInfo", {
-          music: `${nowPlaying.music} ${nowPlaying.author}`,
-        })
-        .then((res) => {
-          if (Object.keys(res.data).length == 0) {
-            setMusicData(null);
-            setLastPlayed(nowPlaying);
-          } else {
-            // console.log(res.data);
-            setMusicData(res.data);
-            setLastPlayed(nowPlaying);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
-    if (nowPlaying != undefined) {
-      if (lastPlayed == null) {
-        return;
-      }
-      if (lastPlayed != null && lastPlayed.music !== nowPlaying.music) {
-        console.log("Pegando dados da música");
-
-        axios
-          .post("/api/getMusicInfo", {
-            music: `${nowPlaying.music} ${nowPlaying.author}`,
-          })
-          .then((res) => {
-            if (res.data == {}) {
-              setMusicData(null);
-              setLastPlayed(nowPlaying);
-            } else {
-              // console.log(res.data);
-              setMusicData(res.data);
-              setLastPlayed(nowPlaying);
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      } else if (lastPlayed.music == nowPlaying.music) {
-        axios
-          .post("/api/getMusicInfo", {
-            music: `${nowPlaying.music} ${nowPlaying.author}`,
-          })
-          .then((res) => {
-            if (res.data == {}) {
-              setMusicData(null);
-              setLastPlayed(nowPlaying);
-            } else {
-              // console.log(res.data);
-              setMusicData(res.data);
-              setLastPlayed(nowPlaying);
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      }
+  function setSync() {
+    if (isSyncEnabled) {
+      setSyncEnabled(!isSyncEnabled);
+      const syncdata = [inputID, !isSyncEnabled];
+      localStorage.setItem("discordID", JSON.stringify(syncdata));
     } else {
-      setMusicData(null);
+      if (inputID.trim() != "") {
+        setSyncEnabled(!isSyncEnabled);
+        const syncdata = [inputID, !isSyncEnabled];
+        localStorage.setItem("discordID", JSON.stringify(syncdata));
+        const content = getUser(datatofetch, inputID);
+        setDiscordSync(content);
+      } else {
+        const syncdata = [inputID, isSyncEnabled];
+        localStorage.setItem("discordID", JSON.stringify(syncdata));
+      }
     }
-  }, [nowPlaying, lastPlayed]);
-
-  function updateCheckStatus(ctx: any) {
-    // console.log("updateCheckStatus");
-    axios
-      .post("https://sing-watch.vercel.app/api/checker", {
-        userID: "528228889823281152",
-      })
-      .then((res) => {
-        if (res.status === 200) {
-          const data = res.data.data;
-          // console.log(data);
-          if (data != null) {
-            if (ctx === null) {
-              console.log("DiscordSync is null");
-              setNowPlaying(data.musicPlaying.musicData);
-              // setLastUpdate(timeSince(data.musicPlaying.updateAt));
-              setDiscordSync(data);
-            } else {
-              if (ctx.serverid != data.serverid) {
-                console.log("ServerID diferente");
-                // console.log(data.musicPlaying.musicData);
-                // console.log(lastPlayed);
-                setNowPlaying(data.musicPlaying.musicData);
-
-                // setLastUpdate(timeSince(data.musicPlaying.updateAt));
-                setDiscordSync(data);
-              } else if (data.musicPlaying.musicData != undefined) {
-                if (data != null && nowPlaying != null) {
-                  if (nowPlaying.music != data.musicPlaying.musicData.music) {
-                    // setLastUpdate(timeSince(data.musicPlaying.updateAt));
-                    setNowPlaying(data.musicPlaying.musicData);
-                    setDiscordSync(data);
-                  }
-                }
-              } else {
-                setNowPlaying(data.musicPlaying.musicData);
-                setDiscordSync(data);
-              }
-            }
-          } else {
-            setDiscordSync(null);
-          }
-        }
-      });
   }
-  // useEffect(() => {
-  //   updateCheckStatus();
-  //   const interval = setTimeout(() => updateCheckStatus(), 5000);
-  //   return () => {
-  //     clearTimeout(interval);
-  //   };
-  // }, [discordSync]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      updateCheckStatus(discordSync);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [discordSync]);
 
   return (
     <>
-      {discordSync && (
+      <div
+        id="discordcard"
+        className="bg-[#2A2B35] border-[2px] border-[#5385d08a] w-full  h-12 mt-5 flex flex-row rounded-[10px] px-0"
+      >
+        <input
+          value={inputID}
+          onChange={(e) => setInputID(e.target.value)}
+          type="number"
+          disabled={isSyncEnabled}
+          placeholder="Use your DiscordID to sync your music"
+          className="disabled:text-opacity-50 appearance-none w-full bg-transparent outline-none placeholder:text-[13px] placeholder:text-white/70 border-0 text-white font-normal ml-3 text-[14px]"
+        />
+        <button
+          onClick={() => setSync()}
+          className={`${
+            isSyncEnabled
+              ? "bg-[#205db9] text-white/90"
+              : "bg-[#2a79ef] text-white/90"
+          } min-w-max px-7 text-sm rounded-r-[8px] `}
+        >
+          {isSyncEnabled ? "Disable Sync" : "Enable Sync"}
+        </button>
+      </div>
+      {discordSync && isSyncEnabled && (
         <div
           id="discordcard"
-          className="bg-[#2A2B35] border-[2px] border-[#5385d08a] w-full min-h-[135px] h-[135px] mt-5 flex flex-col  pb-2 rounded-[10px] px-4"
+          className="bg-[#2A2B35] border-[2px] border-[#5385d08a] w-full  h-auto mt-3 flex flex-col  pb-2 rounded-[10px] px-4"
         >
-          <h4 className="text-white text-[13px] pt-3">Discord Sync</h4>
+          <h4 className="text-white text-[13px] pt-3">
+            Discord Sync - {discordSync.servername}
+          </h4>
 
-          <div className="h-full flex justify-start items-center pt-3 gap-x-3 pb-2 overflow-x-auto">
+          <div className="h-full flex justify-start items-center pt-4 gap-x-3 pb-[0.57rem] overflow-x-auto">
             {musicData && timeSince(discordSync.musicPlaying.updateAt) < 6 ? (
               <>
                 <img
@@ -184,12 +224,15 @@ function DiscordSyncCard(props: any) {
                 ></img>
                 <div className="flex flex-col justify-start">
                   <h3 className="text-white mb-0">{musicData.data.title}</h3>
-                  <h2 className="text-white/60 font-light">
+                  <h2 className="text-white/80 font-light text-sm">
                     {musicData.data.artist.name}
                   </h2>
-                  <h4 className="text-white/70 font-light text-sm">
-                    tocada a {timeSince(discordSync.musicPlaying.updateAt)}{" "}
-                    minutos atrás
+                  <h4 className="text-white/60 font-light text-xs mt-1">
+                    {timeSince(discordSync.musicPlaying.updateAt) <= 1
+                      ? "Iniciada agora"
+                      : "Iniciada há " +
+                        timeSince(discordSync.musicPlaying.updateAt) +
+                        " minutos"}
                   </h4>
                 </div>
               </>

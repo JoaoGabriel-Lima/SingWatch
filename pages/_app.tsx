@@ -4,11 +4,16 @@ import "../styles/globals.css";
 // import type { AppProps } from "next/app";
 import React from "react";
 // import { AppProps } from "next/app";
+import { MusicProvider } from "../context/music";
 
 import { AppProps } from "next/app";
 
 function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
+  return (
+    <MusicProvider>
+      <Component {...pageProps} />
+    </MusicProvider>
+  );
 }
 
 export default MyApp;

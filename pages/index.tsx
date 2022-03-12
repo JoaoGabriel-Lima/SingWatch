@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import type { NextPage } from "next";
 import Head from "next/head";
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { HomeCointainer } from "../styles/components/home";
 import { FiSearch } from "react-icons/fi";
 import axios from "axios";
@@ -11,19 +11,22 @@ import Link from "next/link";
 import MusicHistoryCard from "./components/MusicHistoryCard";
 import { ThemeProvider } from "styled-components";
 import DiscordSyncCard from "./components/discordSyncCard";
+import { MusicContext } from "../context/music";
+// import DiscordSyncCard from "./components/discordSyncCar
 
 const Home: NextPage = () => {
   const [inputValue, setInputValue] = React.useState("");
   const [musicList, setMusicList] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [isLoadingLyrics, setIsLoadingLyrics] = React.useState(false);
-  const [selectedMusic, setSelectedMusic]: any = React.useState({});
   const [musicLyric, setMusicLyric] = React.useState("");
   const [lyricsError, setLyricsError] = React.useState(true);
   const [musicHistory, setMusicHistory]: any = React.useState([]);
   const [selectedColor, setSelectedColor] = React.useState("#2757a0");
   const [selecttextcolor, setSelecttextcolor] = React.useState(false);
   const [provider, setProvider] = React.useState("SingWatch Lyrics");
+
+  const { selectedMusic, setSelectedMusic } = useContext(MusicContext);
 
   const colors = [
     "#5c6d81",
@@ -80,6 +83,7 @@ const Home: NextPage = () => {
     setLyricsError(false);
     setIsLoadingLyrics(true);
     setProvider("SingWatch Lyrics");
+    // console.log(selectedMusic);
     const musictoFind = selectedMusic;
     if (musictoFind.author != undefined || musictoFind.title != undefined) {
       axios
@@ -176,7 +180,6 @@ const Home: NextPage = () => {
       localStorage.setItem("musicHistory", JSON.stringify(newMusicHistory));
       setMusicHistory(newMusicHistory);
     }
-    console.log(JSON.parse(localStorage.getItem("musicHistory") || "[]"));
   };
 
   const handleMusicHistorySelect = (i: any) => {
@@ -207,10 +210,6 @@ const Home: NextPage = () => {
     error: lyricsError,
     textColor: selecttextcolor,
   };
-
-  // useEffect(() => {
-  //   return () => clearInterval(interval);
-  // }, []);
 
   return (
     <ThemeProvider theme={theme}>
@@ -307,7 +306,8 @@ const Home: NextPage = () => {
 
             <DiscordSyncCard />
           </div>
-          {selectedMusic.author != undefined && musicHistory.length > 0 ? (
+          {(selectedMusic.author != undefined && musicHistory.length > 0) ||
+          Object.keys(selectedMusic).length !== 0 ? (
             <div
               id="lyrics"
               className={`w-[100%] max-w-[1000px] ${
