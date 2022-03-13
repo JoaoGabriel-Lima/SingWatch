@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 
     await axios
       .get(
-        `${process.env.MUSIC_INFO_URI}=${encodeURI(
+        `${process.env.NEXT_PUBLIC_MUSIC_INFO_URI}=${encodeURI(
           music
             .trim()
             .normalize("NFD")

@@ -25,6 +25,7 @@ const Home: NextPage = () => {
   const [selecttextcolor, setSelecttextcolor] = React.useState(false);
   const [provider, setProvider] = React.useState("SingWatch Lyrics");
 
+  const musicinfourl = process.env.NEXT_PUBLIC_MUSIC_INFO_URI;
   const { selectedMusic, setSelectedMusic } = useContext(MusicContext);
 
   const colors = [
@@ -127,7 +128,7 @@ const Home: NextPage = () => {
       if (inputValue.trim() !== "") {
         axios
           .get(
-            `${process.env.MUSIC_INFO_URI}=${encodeURI(
+            `${musicinfourl}=${encodeURI(
               inputValue
                 .trim()
                 .normalize("NFD")
