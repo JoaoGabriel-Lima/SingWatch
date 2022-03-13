@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://github.com/JoaoGabriel-Lima/SingWatch/blob/main/logo.png" alt="logo">
+<img width="402px" src="https://github.com/JoaoGabriel-Lima/SingWatch/blob/main/logo.png" alt="logo">
 </p>
 </p>
 
