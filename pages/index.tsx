@@ -18,15 +18,19 @@ const Home: NextPage = () => {
   const [musicList, setMusicList] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [isLoadingLyrics, setIsLoadingLyrics] = React.useState(false);
-  const [musicLyric, setMusicLyric] = React.useState("");
+  const [musicLyric, setMusicLyric]: any = React.useState("");
   const [lyricsError, setLyricsError] = React.useState(true);
   const [musicHistory, setMusicHistory]: any = React.useState([]);
   const [selectedColor, setSelectedColor] = React.useState("#2757a0");
   const [selecttextcolor, setSelecttextcolor] = React.useState(false);
   const [provider, setProvider] = React.useState("SingWatch Lyrics");
 
+  const [secondsArray, setSecondsArray] = React.useState([]);
+
+  const synclyrics = process.env.NEXT_PUBLIC_SYNC_LYRICS_URI;
   const musicinfourl = process.env.NEXT_PUBLIC_MUSIC_INFO_URI;
-  const { selectedMusic, setSelectedMusic } = useContext(MusicContext);
+  const { selectedMusic, setSelectedMusic, isSyncEnabled, seconds } =
+    useContext(MusicContext);
 
   const colors = [
     "#5c6d81",
@@ -58,6 +62,48 @@ const Home: NextPage = () => {
     true,
   ];
 
+  const getLyrics = async (musictoFind: any) => {
+    await axios
+      .get(
+        `https://api.lyrics.ovh/v1/${musictoFind.author}/${musictoFind.title}`
+      )
+      .then((res) => {
+        if (res.status === 200) {
+          setMusicLyric(res.data.lyrics);
+          setIsLoadingLyrics(false);
+          setLyricsError(false);
+          return;
+        }
+      })
+      .catch((err) => {
+        setProvider("Genius Lyrics");
+        axios
+          .post("/api/lyrics", {
+            author: musictoFind.author,
+            title: musictoFind.title,
+          })
+          .then((res) => {
+            if (res.status === 200) {
+              if (res.data.lyrics != null) {
+                setMusicLyric(res.data.lyrics);
+                setIsLoadingLyrics(false);
+                setLyricsError(false);
+                return;
+              } else {
+                setLyricsError(true);
+                setIsLoadingLyrics(false);
+                return;
+              }
+            }
+          })
+          .catch((err) => {
+            setIsLoadingLyrics(false);
+            setLyricsError(true);
+            return;
+          });
+      });
+  };
+
   useEffect(() => {
     if (typeof window === "object") {
       if (localStorage.getItem("musicHistory") !== null) {
@@ -74,53 +120,40 @@ const Home: NextPage = () => {
     }
   }, []);
 
+  // const delay = (ms) => new Promise((res) => setTimeout(res, ms));
   useEffect(() => {
-    const musicColorDecied = Math.floor(Math.random() * colors.length);
-    setSelectedColor(colors[musicColorDecied]);
-    setSelecttextcolor(texts[musicColorDecied]);
-
-    setLyricsError(false);
-    setIsLoadingLyrics(true);
-    setProvider("SingWatch Lyrics");
-    const musictoFind = selectedMusic;
-    if (musictoFind.author != undefined || musictoFind.title != undefined) {
-      axios
-        .get(
-          `https://api.lyrics.ovh/v1/${musictoFind.author}/${musictoFind.title}`
-        )
-        .then((res) => {
-          if (res.status === 200) {
-            setMusicLyric(res.data.lyrics);
-            setIsLoadingLyrics(false);
-            setLyricsError(false);
-          }
-        })
-        .catch((err) => {
-          setProvider("Genius Lyrics");
+    (async function () {
+      const musicColorDecied = Math.floor(Math.random() * colors.length);
+      setSelectedColor(colors[musicColorDecied]);
+      setSelecttextcolor(texts[musicColorDecied]);
+      setLyricsError(false);
+      setIsLoadingLyrics(true);
+      setProvider("SingWatch Lyrics");
+      const musictoFind = selectedMusic;
+      if (musictoFind.author != undefined || musictoFind.title != undefined) {
+        if (isSyncEnabled) {
           axios
-            .post("/api/lyrics", {
-              author: musictoFind.author,
-              title: musictoFind.title,
-            })
+            .get(`${synclyrics}=${musictoFind.author} ${musictoFind.title}`)
             .then((res) => {
-              if (res.status === 200) {
-                if (res.data.lyrics != null) {
-                  setMusicLyric(res.data.lyrics);
-                  setIsLoadingLyrics(false);
-                  setLyricsError(false);
-                } else {
-                  setLyricsError(true);
-                  setIsLoadingLyrics(false);
-                }
-              }
-            })
-            .catch((err) => {
+              setProvider("SingWatch Sync Lyrics");
+              setMusicLyric(res.data);
+
+              // create a const with array that contains all object.seconds of res.data
+
+              setSecondsArray(res.data.map((secs: any) => secs.seconds));
               setIsLoadingLyrics(false);
-              setLyricsError(true);
+              setLyricsError(false);
+            })
+            .catch(async (err) => {
+              // abort controller and then try to getLyrics
+              await getLyrics(musictoFind);
             });
-        });
-    }
-  }, [selectedMusic]);
+        } else {
+          getLyrics(musictoFind);
+        }
+      }
+    })();
+  }, [selectedMusic, isSyncEnabled]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -295,6 +328,7 @@ const Home: NextPage = () => {
             </div>
             {musicHistory && musicHistory.length > 0 && (
               <MusicHistoryCard
+                selectedcolor={selectedColor}
                 musics={musicHistory}
                 selectmusic={handleMusicHistorySelect}
                 deletemusic={handleMusicHistoryDelete}
@@ -311,8 +345,17 @@ const Home: NextPage = () => {
                 lyricsError && "bg-[#2a2b35]"
               } min-h-[600px]  mt-10 rounded-t-[30px]`}
             >
-              <div className="w-full h-full flex flex-col px-[33px] py-[30px]">
-                <div className="flex justify-between items-center">
+              <div className="w-full h-full flex flex-col px-[33px] pb-[30px] pt-[17px]">
+                <div
+                  className="flex justify-between items-center sticky top-0  pt-[13px] pb-[25px]"
+                  style={{
+                    background: `${
+                      lyricsError
+                        ? "#2a2b35"
+                        : `linear-gradient(180deg, ${selectedColor} 85%, rgba(255,255,255,0) 100%)`
+                    }`,
+                  }}
+                >
                   <div className="flex justify-start items-center">
                     <img
                       className="w-[4.5rem] h-[4.5rem] min-w-[4.5rem] bg-white rounded-lg drop-shadow-xl"
@@ -321,13 +364,13 @@ const Home: NextPage = () => {
                     <div className="flex flex-col ml-4 justify-center font-medium">
                       <h1 className="text-white ">{selectedMusic.title}</h1>
                       <h4 className="text-sm text-white/60">
-                        {selectedMusic.album} - {selectedMusic.author}
+                        {selectedMusic.author}
                       </h4>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-8">
+                <div className="mt-[7px]">
                   {isLoadingLyrics ? (
                     <div className="w-full flex justify-center items-center mt-5 flex-col">
                       <RiLoader4Fill className="text-white/90 text-4xl animate-spin" />
@@ -348,10 +391,26 @@ const Home: NextPage = () => {
                     </div>
                   ) : (
                     <>
-                      <p
-                        id="lyricstext"
-                        className="text-white whitespace-pre-line text-[1.35rem] leading-[2.2rem] sm:leading-[2.6rem] font-semibold sm:text-[1.4rem]"
-                      >{`${musicLyric}`}</p>
+                      {provider == "SingWatch Sync Lyrics" ? (
+                        <div className=" flex flex-col gap-y-[10px]">
+                          {musicLyric.map((lyric: any, index: number) => (
+                            <p
+                              key={index}
+                              id={`${lyric.seconds}`}
+                              className={`${
+                                seconds >= lyric.seconds &&
+                                seconds < secondsArray[index + 1]
+                                  ? "text-white/80"
+                                  : "text-black/60"
+                              } font-semibold sm:text-[1.4rem] text-[1.35rem]`}
+                            >
+                              {lyric.lyrics}
+                            </p>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="lyricstext text-white whitespace-pre-line text-[1.35rem] leading-[2.2rem] sm:leading-[2.6rem] font-semibold sm:text-[1.4rem]">{`${musicLyric}`}</p>
+                      )}
                       <p className="mt-12 text-white/80 text-sm">
                         Lyrics provided by {provider}
                       </p>

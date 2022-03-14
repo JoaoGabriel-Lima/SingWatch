@@ -18,6 +18,7 @@ function MusicHistoryCard(props: any) {
           props.musics.map((music: any, index: Number) => (
             <MusicFile
               selected={index === 0 ? true : false}
+              selectedColor={props.selectedcolor}
               selectmusic={props.selectmusic}
               deletemusic={props.deletemusic}
               index={index}

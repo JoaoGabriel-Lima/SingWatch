@@ -24,7 +24,7 @@ export const HomeCointainer = styled.div`
       props.theme.error ? "#2a2b35" : props.theme.colors};
   }
 
-  #lyricstext {
+  .lyricstext {
     color: ${(props) =>
       props.theme.textColor ? "rgba(0, 0, 0, 0.6)" : "rgba(255,255,255,0.8)"};
   }

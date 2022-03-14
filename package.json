@@ -11,6 +11,7 @@
   "dependencies": {
     "axios": "^0.26.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
     "genius-lyrics-api": "^3.2.0",
     "lyrics-searcher": "^1.0.58",
     "mongodb": "^4.4.1",

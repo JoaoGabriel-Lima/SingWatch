@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable require-jsdoc */
 import axios from "axios";
 import React, { useContext, useEffect } from "react";
@@ -5,14 +6,21 @@ import io from "socket.io-client";
 import { MusicContext } from "../../context/music";
 
 function DiscordSyncCard(props: any) {
-  const SOCKET = process.env.NEXT_PUBLIC_SOCKET_URL;
+  const socketurl = process.env.NEXT_PUBLIC_SOCKET_URL;
   const [discordSync, setDiscordSync]: any = React.useState(null);
   const [nowPlaying, setNowPlaying]: any = React.useState(null);
   const [musicData, setMusicData]: any = React.useState(null);
-  const { selectedMusic, setSelectedMusic, isSyncEnabled, setSyncEnabled } =
-    useContext(MusicContext);
+  const {
+    selectedMusic,
+    setSelectedMusic,
+    isSyncEnabled,
+    setSyncEnabled,
+    setSeconds,
+    seconds,
+  } = useContext(MusicContext);
   const [inputID, setInputID]: any = React.useState("");
   const [datatofetch, setData]: any = React.useState(null);
+  const [minutes, setMinutes]: any = React.useState(0);
 
   const getUser = (data: any, id: string) => {
     return data.find((data: any) => data.channels[0].users.includes(id));
@@ -28,6 +36,12 @@ function DiscordSyncCard(props: any) {
     } else {
       return interval;
     }
+  }
+
+  function timeSinceSeconds(date: any) {
+    const actualdate: any = new Date();
+    const seconds = Math.floor((actualdate - Date.parse(date)) / 1000);
+    return seconds;
   }
 
   function setSync() {
@@ -50,6 +64,26 @@ function DiscordSyncCard(props: any) {
   }
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      if (discordSync) {
+        const seconds = timeSinceSeconds(discordSync.musicPlaying.updateAt) + 1;
+        setSeconds(seconds);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [discordSync]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (discordSync) {
+        const minutes = timeSince(discordSync.musicPlaying.updateAt);
+        setMinutes(minutes);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [discordSync]);
+
+  useEffect(() => {
     if (typeof window === "object") {
       if (localStorage.getItem("discordID") !== null) {
         const data = JSON.parse(localStorage.getItem("discordID") || "[]");
@@ -57,9 +91,12 @@ function DiscordSyncCard(props: any) {
         setSyncEnabled(data[1]);
       }
     }
-    const socket = io(`${SOCKET}`, {
-      transports: ["websocket", "polling", "flashsocket"],
-    });
+    const socket = io(
+      `${socketurl || "https://singwatch-backend.herokuapp.com/"}`,
+      {
+        transports: ["websocket", "polling", "flashsocket"],
+      }
+    );
     socket.on("previusData", (data: any) => {
       const inputvalue = JSON.parse(
         localStorage.getItem("discordID") || "[]"
@@ -127,8 +164,11 @@ function DiscordSyncCard(props: any) {
               });
           } else if (Object.keys(selectedMusic).length != 0 && isSyncEnabled) {
             if (
-              selectedMusic.tile != discordSync.musicPlaying.musicData.music
+              discordSync.musicPlaying.musicData.music
+                .toLowerCase()
+                .includes(selectedMusic.title.toLowerCase())
             ) {
+            } else {
               setNowPlaying({});
             }
           }
@@ -184,7 +224,11 @@ function DiscordSyncCard(props: any) {
           localStorage.getItem("musicHistory") || "[]"
         );
         if (musicData.length > 0) {
-          setSelectedMusic(musicData[0]);
+          if (!discordSync) {
+            setSelectedMusic(musicData[0]);
+          } else {
+            setSelectedMusic({});
+          }
         } else {
           setSelectedMusic({});
         }
@@ -239,11 +283,9 @@ function DiscordSyncCard(props: any) {
                     {musicData.data.artist.name}
                   </h2>
                   <h4 className="text-white/60 font-light text-xs mt-1">
-                    {timeSince(discordSync.musicPlaying.updateAt) <= 1
+                    {minutes <= 1
                       ? "Iniciada agora"
-                      : "Iniciada há " +
-                        timeSince(discordSync.musicPlaying.updateAt) +
-                        " minutos"}
+                      : "Iniciada a " + minutes + " minutos"}
                   </h4>
                 </div>
               </>
