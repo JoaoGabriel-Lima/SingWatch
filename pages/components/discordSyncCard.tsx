@@ -91,12 +91,9 @@ function DiscordSyncCard(props: any) {
         setSyncEnabled(data[1]);
       }
     }
-    const socket = io(
-      `${socketurl || "https://singwatch-backend.herokuapp.com/"}`,
-      {
-        transports: ["websocket", "polling", "flashsocket"],
-      }
-    );
+    const socket = io(`${socketurl}`, {
+      transports: ["websocket", "polling", "flashsocket"],
+    });
     socket.on("previusData", (data: any) => {
       const inputvalue = JSON.parse(
         localStorage.getItem("discordID") || "[]"
