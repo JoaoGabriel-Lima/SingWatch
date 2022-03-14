@@ -66,10 +66,10 @@ function DiscordSyncCard(props: any) {
   useEffect(() => {
     const interval = setInterval(() => {
       if (discordSync) {
-        const seconds = timeSinceSeconds(discordSync.musicPlaying.updateAt) + 1;
+        const seconds = timeSinceSeconds(discordSync.musicPlaying.updateAt);
         setSeconds(seconds);
       }
-    }, 1000);
+    }, 500);
     return () => clearInterval(interval);
   }, [discordSync]);
 

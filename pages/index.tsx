@@ -63,6 +63,7 @@ const Home: NextPage = () => {
   ];
 
   const getLyrics = async (musictoFind: any) => {
+    // ! Axios.all
     await axios
       .get(
         `https://api.lyrics.ovh/v1/${musictoFind.author}/${musictoFind.title}`
