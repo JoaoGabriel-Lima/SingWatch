@@ -274,7 +274,6 @@ const Home: NextPage = () => {
       <HomeCointainer>
         <Head>
           <title>SingWatch - Home</title>
-          <link ref="manifest" href="/manifest.json" />
           <meta name="theme-color" content="#2a79ef"></meta>
           <meta
             name="description"
