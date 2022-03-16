@@ -10,6 +10,7 @@ function DiscordSyncCard(props: any) {
   const [discordSync, setDiscordSync]: any = React.useState(null);
   const [nowPlaying, setNowPlaying]: any = React.useState(null);
   const [musicData, setMusicData]: any = React.useState(null);
+  const [firsttime, setFirstTime]: any = React.useState(true);
   const {
     selectedMusic,
     setSelectedMusic,
@@ -138,13 +139,23 @@ function DiscordSyncCard(props: any) {
                     title: res.data.data.title,
                   };
                   if (timeSince(discordSync.musicPlaying.updateAt) < 6) {
-                    await delay(1000);
-                    setSyncNowPlaying(data);
-                    setSelectedMusic(data);
-                    window.scrollTo({
-                      top: 0,
-                      behavior: "smooth", // for smoothly scrolling
-                    });
+                    if (firsttime) {
+                      setFirstTime(false);
+                      await delay(3000);
+                      setSyncNowPlaying(data);
+                      setSelectedMusic(data);
+                      window.scrollTo({
+                        top: 0,
+                        behavior: "smooth", // for smoothly scrolling
+                      });
+                    } else {
+                      setSyncNowPlaying(data);
+                      setSelectedMusic(data);
+                      window.scrollTo({
+                        top: 0,
+                        behavior: "smooth", // for smoothly scrolling
+                      });
+                    }
                   } else if (timeSince(discordSync.musicPlaying.updateAt) > 6) {
                     const musicData = JSON.parse(
                       localStorage.getItem("musicHistory") || "[]"
@@ -196,13 +207,23 @@ function DiscordSyncCard(props: any) {
                   title: res.data.data.title,
                 };
                 if (timeSince(discordSync.musicPlaying.updateAt) < 6) {
-                  await delay(1000);
-                  setSyncNowPlaying(data);
-                  setSelectedMusic(data);
-                  window.scrollTo({
-                    top: 0,
-                    behavior: "smooth", // for smoothly scrolling
-                  });
+                  if (firsttime) {
+                    setFirstTime(false);
+                    await delay(3000);
+                    setSyncNowPlaying(data);
+                    setSelectedMusic(data);
+                    window.scrollTo({
+                      top: 0,
+                      behavior: "smooth", // for smoothly scrolling
+                    });
+                  } else {
+                    setSyncNowPlaying(data);
+                    setSelectedMusic(data);
+                    window.scrollTo({
+                      top: 0,
+                      behavior: "smooth", // for smoothly scrolling
+                    });
+                  }
                 } else if (timeSince(discordSync.musicPlaying.updateAt) > 6) {
                   const musicData = JSON.parse(
                     localStorage.getItem("mtusicHistory") || "[]"

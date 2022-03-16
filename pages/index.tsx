@@ -374,7 +374,7 @@ const Home: NextPage = () => {
                 lyricsError && "bg-[#2a2b35]"
               } min-h-[70vh]  mt-10 rounded-t-[30px]`}
             >
-              <div className="w-full h-full flex flex-col px-[33px] pb-[30px] pt-[17px]">
+              <div className="w-full h-full flex flex-col px-[20px] sm:px-[33px] pb-[30px] pt-[17px]">
                 <div
                   className="flex justify-between items-center sticky top-0  pt-[13px] pb-[25px]"
                   style={{
