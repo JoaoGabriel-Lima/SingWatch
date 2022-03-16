@@ -1,3 +1,4 @@
+/* eslint-disable react/no-string-refs */
 /* eslint-disable react/no-unescaped-entities */
 import type { NextPage } from "next";
 import Head from "next/head";
@@ -68,9 +69,10 @@ const Home: NextPage = () => {
     true,
     true,
   ];
-
+  //
   const getLyrics = async (musictoFind: any) => {
     // ! Axios.all
+
     await axios
       .get(
         `https://api.lyrics.ovh/v1/${musictoFind.author}/${musictoFind.title}`
@@ -83,32 +85,34 @@ const Home: NextPage = () => {
           return;
         }
       })
-      .catch((err) => {
-        setProvider("Genius Lyrics");
-        axios
-          .post("/api/lyrics", {
-            author: musictoFind.author,
-            title: musictoFind.title,
-          })
-          .then((res) => {
-            if (res.status === 200) {
-              if (res.data.lyrics != null) {
-                setMusicLyric(res.data.lyrics);
-                setIsLoadingLyrics(false);
-                setLyricsError(false);
-                return;
-              } else {
-                setLyricsError(true);
-                setIsLoadingLyrics(false);
-                return;
+      .catch(async (err) => {
+        if (musictoFind.title == selectedMusic.title) {
+          setProvider("Genius Lyrics");
+          axios
+            .post("/api/lyrics", {
+              author: musictoFind.author,
+              title: musictoFind.title,
+            })
+            .then((res) => {
+              if (res.status === 200) {
+                if (res.data.lyrics != null) {
+                  setMusicLyric(res.data.lyrics);
+                  setIsLoadingLyrics(false);
+                  setLyricsError(false);
+                  return;
+                } else {
+                  setLyricsError(true);
+                  setIsLoadingLyrics(false);
+                  return;
+                }
               }
-            }
-          })
-          .catch((err) => {
-            setIsLoadingLyrics(false);
-            setLyricsError(true);
-            return;
-          });
+            })
+            .catch((err) => {
+              setIsLoadingLyrics(false);
+              setLyricsError(true);
+              return;
+            });
+        }
       });
   };
 
@@ -270,6 +274,8 @@ const Home: NextPage = () => {
       <HomeCointainer>
         <Head>
           <title>SingWatch - Home</title>
+          <link ref="manifest" href="/manifest.json" />
+          <meta name="theme-color" content="#2a79ef"></meta>
           <meta
             name="description"
             content="SingWatch is an open source project that aims to find song lyrics without difficulties, after all who doesn't like to know how to sing their favorite song?"
@@ -367,7 +373,7 @@ const Home: NextPage = () => {
               id="lyrics"
               className={`w-[100%] max-w-[1000px] ${
                 lyricsError && "bg-[#2a2b35]"
-              } min-h-[600px]  mt-10 rounded-t-[30px]`}
+              } min-h-[70vh]  mt-10 rounded-t-[30px]`}
             >
               <div className="w-full h-full flex flex-col px-[33px] pb-[30px] pt-[17px]">
                 <div
@@ -387,7 +393,11 @@ const Home: NextPage = () => {
                         src={selectedMusic.cover}
                       ></img>
                       <div className="flex flex-col ml-4 justify-center font-medium">
-                        <h1 className="text-white ">{selectedMusic.title}</h1>
+                        <h1 className="text-white ">
+                          {selectedMusic.title.length > 27
+                            ? `${selectedMusic.title.substring(0, 27)}...`
+                            : selectedMusic.title}
+                        </h1>
                         <h4 className="text-sm text-white/60">
                           {selectedMusic.author}
                         </h4>

@@ -23,7 +23,11 @@ function DiscordSyncCard(props: any) {
   const [minutes, setMinutes]: any = React.useState(0);
 
   const getUser = (data: any, id: string) => {
-    return data.find((data: any) => data.channels[0].users.includes(id));
+    if (data != null) {
+      return data.find((data: any) => data.channels[0].users.includes(id));
+    } else {
+      return {};
+    }
   };
 
   function timeSince(date: any) {
@@ -111,7 +115,7 @@ function DiscordSyncCard(props: any) {
       setData(data);
     });
   }, []);
-
+  const delay = (ms: any) => new Promise((res) => setTimeout(res, ms));
   useEffect(() => {
     if (isSyncEnabled) {
       if (discordSync != null || discordSync != undefined) {
@@ -123,7 +127,7 @@ function DiscordSyncCard(props: any) {
               .post("/api/getMusicInfo", {
                 music: `${music.music} ${music.author}`,
               })
-              .then((res): any => {
+              .then(async (res: any) => {
                 if (Object.keys(res.data).length == 0) {
                   setMusicData(null);
                 } else {
@@ -134,6 +138,7 @@ function DiscordSyncCard(props: any) {
                     title: res.data.data.title,
                   };
                   if (timeSince(discordSync.musicPlaying.updateAt) < 6) {
+                    await delay(1000);
                     setSyncNowPlaying(data);
                     setSelectedMusic(data);
                     window.scrollTo({
@@ -180,7 +185,7 @@ function DiscordSyncCard(props: any) {
             .post("/api/getMusicInfo", {
               music: `${music.music} ${music.author}`,
             })
-            .then((res): any => {
+            .then(async (res: any) => {
               if (Object.keys(res.data).length == 0) {
                 setMusicData(null);
               } else {
@@ -191,6 +196,7 @@ function DiscordSyncCard(props: any) {
                   title: res.data.data.title,
                 };
                 if (timeSince(discordSync.musicPlaying.updateAt) < 6) {
+                  await delay(1000);
                   setSyncNowPlaying(data);
                   setSelectedMusic(data);
                   window.scrollTo({
@@ -199,7 +205,7 @@ function DiscordSyncCard(props: any) {
                   });
                 } else if (timeSince(discordSync.musicPlaying.updateAt) > 6) {
                   const musicData = JSON.parse(
-                    localStorage.getItem("musicHistory") || "[]"
+                    localStorage.getItem("mtusicHistory") || "[]"
                   );
                   if (musicData.length > 0) {
                     setSelectedMusic(musicData[0]);
