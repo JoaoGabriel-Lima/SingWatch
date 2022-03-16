@@ -16,7 +16,7 @@ function DiscordSyncCard(props: any) {
     isSyncEnabled,
     setSyncEnabled,
     setSeconds,
-    seconds,
+    setSyncNowPlaying,
   } = useContext(MusicContext);
   const [inputID, setInputID]: any = React.useState("");
   const [datatofetch, setData]: any = React.useState(null);
@@ -134,6 +134,7 @@ function DiscordSyncCard(props: any) {
                     title: res.data.data.title,
                   };
                   if (timeSince(discordSync.musicPlaying.updateAt) < 6) {
+                    setSyncNowPlaying(data);
                     setSelectedMusic(data);
                     window.scrollTo({
                       top: 0,
@@ -190,6 +191,7 @@ function DiscordSyncCard(props: any) {
                   title: res.data.data.title,
                 };
                 if (timeSince(discordSync.musicPlaying.updateAt) < 6) {
+                  setSyncNowPlaying(data);
                   setSelectedMusic(data);
                   window.scrollTo({
                     top: 0,
