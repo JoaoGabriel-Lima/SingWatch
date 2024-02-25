@@ -15,8 +15,12 @@
     "genius-lyrics-api": "^3.2.0",
     "lyrics-searcher": "^1.0.58",
     "mongodb": "^4.4.1",
-    "next": "12.1.0",
+<<<<<<< HEAD
     "NeteaseCloudMusicApi": "^4.15.3",
+    "next": "12.0.7",
+=======
+    "next": "12.1.0",
+>>>>>>> 19ec5d4cc1aea8352d8af34e6b6569b5f571f22e
     "next-pwa": "^5.4.6",
     "qs": "^6.10.3",
     "react": "17.0.2",
