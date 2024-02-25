@@ -1,3 +1,4 @@
+/* eslint-disable require-jsdoc */
 /* eslint-disable react/no-string-refs */
 /* eslint-disable react/no-unescaped-entities */
 import type { NextPage } from "next";
@@ -15,6 +16,10 @@ import DiscordSyncCard from "./components/discordSyncCard";
 import { MusicContext } from "../context/music";
 
 const Home: NextPage = () => {
+  const searchURL =
+    "https://music.xianqiao.wang/neteaseapiv2/search?limit=10&type=1&keywords=";
+  const lyricURL = "https://music.xianqiao.wang/neteaseapiv2/lyric?id=";
+
   const [inputValue, setInputValue] = React.useState("");
   const [musicList, setMusicList] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -30,7 +35,6 @@ const Home: NextPage = () => {
 
   const [isScrollEnabled, setIsScrollEnabled] = React.useState(false);
 
-  const synclyrics = process.env.NEXT_PUBLIC_SYNC_LYRICS_URI;
   const musicinfourl = process.env.NEXT_PUBLIC_MUSIC_INFO_URI;
   const {
     selectedMusic,
@@ -149,13 +153,110 @@ const Home: NextPage = () => {
             syncNowPlaying.title == selectedMusic.title &&
             Object.keys(selectedMusic.title).length > 0
           ) {
+            function normalize(s: string, emptySymbol = true) {
+              let result = s
+                .replace(/（/g, "(")
+                .replace(/）/g, ")")
+                .replace(/【/g, "[")
+                .replace(/】/g, "]")
+                .replace(/。/g, ". ")
+                .replace(/；/g, "; ")
+                .replace(/：/g, ": ")
+                .replace(/？/g, "? ")
+                .replace(/！/g, "! ")
+                .replace(/、|，/g, ", ")
+                .replace(/‘|’|′|＇/g, "'")
+                .replace(/“|”/g, '"')
+                .replace(/〜/g, "~")
+                .replace(/·|・/g, "•");
+
+              result = result
+                .replace(/\([^)]*\)/g, "")
+                .replace(/\[[^\]]*\]/g, "");
+
+              if (emptySymbol) {
+                result = result.replace(/-/g, " ").replace(/\//g, " ");
+              }
+              return result.replace(/\s+/g, " ").trim();
+            }
+
+            const finalURL =
+              searchURL +
+              encodeURIComponent(
+                `${musictoFind.author} ${normalize(musictoFind.title, true)}`
+              );
+
+            const searchResults = await axios.get(finalURL);
+            // console.log(searchResults);
+            const items = searchResults.data.result.songs;
+            // console.log(items);
+            if (!items?.length) {
+              getLyrics(musictoFind);
+              return;
+            }
+            // console.log(selectedMusic);
+            const itemId = 0;
+            // const itemId = items.findIndex(
+            //   (val:any) =>
+            //     Utils.normalize(val.album.name) === expectedAlbumName ||
+            //     Math.abs(info.duration - val.duration) < 1000
+            // );
+            // if (itemId === -1) throw "Cannot find track";
+
             axios
-              .get(`${synclyrics}=${musictoFind.author} ${musictoFind.title}`)
+              .get(lyricURL + items[itemId].id)
               .then((res) => {
                 setProvider("SingWatch Sync Lyrics");
-                setMusicLyric(res.data);
+                const lyrics = res.data.lrc.lyric;
+                console.log(res.data);
+                const lyricsArray = lyrics.split("\n");
+                // console.log(lyricsArray);
+                const secondsArray: any = [];
+                const lyricsArrayFiltered = lyricsArray.filter(
+                  (lyric: any) => lyric !== ""
+                );
+                lyricsArrayFiltered.forEach((lyric: any) => {
+                  const time = lyric.split("]")[0].replace("[", "");
+                  // format time [00:24.935]
+                  const minutes = parseInt(time.split(":")[0]);
+                  const seconds = parseInt(time.split(":")[1].split(".")[0]);
+                  // const miliseconds = parseInt(
+                  //   time.split(":")[1].split(".")[1]
+                  // );
 
-                setSecondsArray(res.data.map((secs: any) => secs.seconds));
+                  const totalInMs = minutes * 60 + seconds;
+                  console.log(totalInMs);
+                  secondsArray.push(totalInMs);
+                });
+
+                setSecondsArray(secondsArray);
+                console.log(secondsArray);
+
+                const lyricsWithoutTimestamps = lyricsArrayFiltered.map(
+                  (lyric: any) => {
+                    return lyric.split("]").slice(1).join("]");
+                  }
+                );
+                console.log(lyricsWithoutTimestamps);
+                if (lyricsWithoutTimestamps.length < 3) {
+                  getLyrics(musictoFind);
+                  return;
+                }
+
+                // lyrics should be an array of objects with seconds and lyrics
+                const lyricsWithSeconds = lyricsWithoutTimestamps.map(
+                  (lyric: any, index: number) => {
+                    return {
+                      seconds: secondsArray[index],
+                      lyrics: lyric,
+                    };
+                  }
+                );
+                setMusicLyric(lyricsWithSeconds);
+
+                // setMusicLyric(res.data);
+
+                // setSecondsArray(res.data.map((secs: any) => secs.seconds));
                 setIsLoadingLyrics(false);
                 setLyricsError(false);
               })

@@ -6,7 +6,7 @@ import io from "socket.io-client";
 import { MusicContext } from "../../context/music";
 
 function DiscordSyncCard(props: any) {
-  const socketurl = process.env.NEXT_PUBLIC_SOCKET_URL;
+  const socketurl = "http://localhost:4040";
   const [discordSync, setDiscordSync]: any = React.useState(null);
   const [nowPlaying, setNowPlaying]: any = React.useState(null);
   const [musicData, setMusicData]: any = React.useState(null);
@@ -46,6 +46,7 @@ function DiscordSyncCard(props: any) {
   function timeSinceSeconds(date: any) {
     const actualdate: any = new Date();
     const seconds = Math.floor((actualdate - Date.parse(date)) / 1000);
+    // console.log(seconds);
     return seconds;
   }
 
@@ -71,7 +72,7 @@ function DiscordSyncCard(props: any) {
   useEffect(() => {
     const interval = setInterval(() => {
       if (discordSync) {
-        const seconds = timeSinceSeconds(discordSync.musicPlaying.updateAt);
+        const seconds = timeSinceSeconds(discordSync?.musicPlaying?.updateAt);
         setSeconds(seconds);
       }
     }, 500);
@@ -81,7 +82,7 @@ function DiscordSyncCard(props: any) {
   useEffect(() => {
     const interval = setInterval(() => {
       if (discordSync) {
-        const minutes = timeSince(discordSync.musicPlaying.updateAt);
+        const minutes = timeSince(discordSync?.musicPlaying?.updateAt);
         setMinutes(minutes);
       }
     }, 1000);
@@ -99,6 +100,10 @@ function DiscordSyncCard(props: any) {
     const socket = io(`${socketurl}`, {
       transports: ["websocket", "polling", "flashsocket"],
     });
+    socket.on("connect", () => {
+      console.log(socket.id); // x8WIv7-mJelg7on_ALbx
+    });
+
     socket.on("previusData", (data: any) => {
       const inputvalue = JSON.parse(
         localStorage.getItem("discordID") || "[]"
@@ -187,8 +192,8 @@ function DiscordSyncCard(props: any) {
             }
           }
         } else if (
-          discordSync.musicPlaying.musicData != null ||
-          discordSync.musicPlaying.musicData != undefined
+          discordSync?.musicPlaying?.musicData != null ||
+          discordSync?.musicPlaying?.musicData != undefined
         ) {
           const music = discordSync.musicPlaying.musicData;
           setNowPlaying(music);

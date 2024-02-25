@@ -1,6 +1,6 @@
 /* eslint-disable require-jsdoc */
 import { getLyrics } from "genius-lyrics-api";
-const api = process.env.GENIUS_API;
+const api = "RX-7IigLielBdgIkVhNHwCH_avGLYowTpbRJMqkbM_KCQiJZDTxmjrUz43yAwYbH";
 
 export default async function handler(req, res) {
   const author = req.body.author;

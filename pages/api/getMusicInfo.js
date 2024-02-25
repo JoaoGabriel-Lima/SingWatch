@@ -54,6 +54,7 @@ export default async function handler(req, res) {
       )
       .then((music) => {
         const info = music.data.tracks;
+        console.log(info);
         if (info != undefined) {
           const data = {
             title: info.items[0].name,
