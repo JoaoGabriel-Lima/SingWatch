@@ -208,7 +208,6 @@ const Home: NextPage = () => {
               .then((res) => {
                 setProvider("SingWatch Sync Lyrics");
                 const lyrics = res.data.lrc.lyric;
-                console.log(res.data);
                 const lyricsArray = lyrics.split("\n");
                 // console.log(lyricsArray);
                 const secondsArray: any = [];
@@ -220,12 +219,12 @@ const Home: NextPage = () => {
                   // format time [00:24.935]
                   const minutes = parseInt(time.split(":")[0]);
                   const seconds = parseInt(time.split(":")[1].split(".")[0]);
-                  // const miliseconds = parseInt(
-                  //   time.split(":")[1].split(".")[1]
-                  // );
+                  const milliseconds = parseInt(
+                    time.split(":")[1].split(".")[1]
+                  );
 
-                  const totalInMs = minutes * 60 + seconds;
-                  console.log(totalInMs);
+                  const totalInMs =
+                    minutes * 60000 + seconds * 1000 + milliseconds;
                   secondsArray.push(totalInMs);
                 });
 
@@ -275,12 +274,10 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     if (isScrollEnabled) {
-      if (document.getElementById(`${seconds}`)! != null) {
-        document.getElementById(`${seconds}`)!.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }
+      document.getElementsByClassName("on")[0]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     }
   }, [seconds, isScrollEnabled]);
 
@@ -559,8 +556,8 @@ const Home: NextPage = () => {
                                 className={`${
                                   seconds >= lyric.seconds &&
                                   seconds < secondsArray[index + 1]
-                                    ? "text-white/80"
-                                    : "text-black/60"
+                                    ? "text-white/80 on"
+                                    : "text-black/60 off"
                                 } transition-colors duration-50 font-semibold sm:text-[1.4rem] text-[1.35rem]`}
                               >
                                 {lyric.lyrics}

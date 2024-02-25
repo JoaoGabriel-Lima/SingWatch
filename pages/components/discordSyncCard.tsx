@@ -45,9 +45,10 @@ function DiscordSyncCard(props: any) {
 
   function timeSinceSeconds(date: any) {
     const actualdate: any = new Date();
-    const seconds = Math.floor((actualdate - Date.parse(date)) / 1000);
-    // console.log(seconds);
-    return seconds;
+    const seconds = actualdate - Date.parse(date);
+    // const ms = seconds * 1000;
+    return Math.floor(seconds);
+    // return ms;
   }
 
   function setSync() {
@@ -75,7 +76,7 @@ function DiscordSyncCard(props: any) {
         const seconds = timeSinceSeconds(discordSync?.musicPlaying?.updateAt);
         setSeconds(seconds);
       }
-    }, 500);
+    }, 200);
     return () => clearInterval(interval);
   }, [discordSync]);
 
